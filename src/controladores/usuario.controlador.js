@@ -48,7 +48,7 @@ function usuarioAdmin(req, res) {
 
 }
 
-// === FUNCION AGREGAR USUARIOSS ==
+// === FUNCION AGREGAR USUARIOS ==
 function agregarUsuario(req, res) {
     var usuarioModel = new usuario();
     var params = req.body;
