@@ -47,6 +47,48 @@ function usuarioAdmin(req, res) {
     })
 
 }
+// === FUNCION AGREGAR USUARIOS ==
+function agregarUsuario(req, res) {
+    var usuarioModel = new usuario();
+    var params = req.body;
+
+    if(params.nombre && params.username && params.email && params.rol){
+        usuarioModel.nombre = params.nombre;
+        usuarioModel.username = params.username;
+        usuarioModel.email = params.email;
+        usuarioModel.password = params.password;
+        usuarioModel.rol = params.rol;
+        usuarioModel.imagen = null;
+        usuario.find({
+            $or: [
+                {username: params.username},
+                {email: params.email}
+            ]
+        }).exec((err, usuarioEncontrado)=>{
+            if(err) return res.status(500).send({mensaje: "error en la peticion"});
+            if(usuarioEncontrado && usuarioEncontrado.length >=1){
+                return res.status(500).send({mensaje: "el usuario ya existe"});
+            }else{
+                bcrypt.hash(params.password, null, null, (err, encryptacion)=>{
+                    usuarioModel.password = encryptacion;
+                    
+                    usuarioModel.save((err, usuarioGuardado)=>{
+                        if(err) res.status(500).send({mensaje: "error en la peticion"});
+                        if(!usuarioGuardado){
+                            return res.status(401).send({mensaje: "No se pudo guardar"});
+                        }
+                        return res.status(200).send({usuarioGuardado})
+                    })
+                    
+                }) 
+            }
+        })
+
+    }else{
+        return res.status(500).send({mensaje: "debe llenar todos los campos"})
+    }
+    
+}
 
 
 // === FUNCION DE ELIMINAR USUARIO ===
@@ -70,6 +112,21 @@ function eliminarUsuario(req, res) {
     })
 }
 
+// === FUNCION EDITAR USUARIO ===
+function editarUsuario(req, res) {
+    var params = req.body;
+    var idUsuario = req.params.id;
+
+    usuario.findByIdAndUpdate(idUsuario, params, {new:true}, (err, usuarioEditado)=>{
+        if(err) return res.status(500).send({mensaje: "Error en la peticion"});
+        if(!usuarioEditado){
+            res.status(500).send({mensaje: "no se pudo editar el usuario"});
+        }
+        
+        return res.status(200).send({usuarioEditado})
+    })
+    
+}
 
 
 
