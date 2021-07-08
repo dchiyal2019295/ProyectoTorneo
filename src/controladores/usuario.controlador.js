@@ -48,59 +48,62 @@ function usuarioAdmin(req, res) {
 
 }
 
-
-// === FUNCION DE ELIMINAR USUARIO ===
-function eliminarUsuario(req, res) {
-    var idUsuario = req.params.idUsuario;
-
-    if (req.user.rol != 'ROL_ADMIN') {
-        return res.status(500).send({ mensaje: 'Solo el administrador puede eliminar un usuario.' });
-    }
-
-    usuario.findByIdAndDelete(idUsuario, (err, usuaiorEliminado) => {
-        if (err) {
-            return res.status(500).send({ mensaje: 'Error en la peticion de eliminar un usuario' });
-        }
-
-        if (!usuarioEliminado) {
-            return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
-        }
-
-        return res.status(200).send({ usuarioEliminado });
-    })
-}
-
-
-
-
-// === Funcion Login === 
-function login(req, res) {
+// === FUNCION AGREGAR USUARIOS ==
+function agregarUsuario(req, res) {
+    var usuarioModel = new usuario();
     var params = req.body;
 
-    usuario.findOne({ email: params.email }, (err, usuarioEncontrado) => {
-        if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+    if(params.nombre && params.username && params.email && params.rol){
+        usuarioModel.nombre = params.nombre;
+        usuarioModel.username = params.username;
+        usuarioModel.email = params.email;
+        usuarioModel.password = params.password;
+        usuarioModel.rol = params.rol;
+        usuarioModel.imagen = null;
+        usuario.find({
+            $or: [
+                {username: params.username},
+                {email: params.email}
+            ]
+        }).exec((err, usuarioEncontrado)=>{
+            if(err) return res.status(500).send({mensaje: "error en la peticion"});
+            if(usuarioEncontrado && usuarioEncontrado.length >=1){
+                return res.status(500).send({mensaje: "el usuario ya existe"});
+            }else{
+                bcrypt.hash(params.password, null, null, (err, encryptacion)=>{
+                    usuarioModel.password = encryptacion;
+                    
+                    usuarioModel.save((err, usuarioGuardado)=>{
+                        if(err) res.status(500).send({mensaje: "error en la peticion"});
+                        if(!usuarioGuardado){
+                            return res.status(401).send({mensaje: "No se pudo guardar"});
+                        }
+                        return res.status(200).send({usuarioGuardado})
+                    })
+                    
+                }) 
+            }
+        })
 
-        if (usuarioEncontrado) {
-            bcrypt.compare(params.passwoRTCDTMFSender, usuarioEncontrado.password, (err, passvVerificada) => {
-                if (passvVerificada) {
-                    if (params.getToken === 'true') {
-                        return res.status(200).send({
-                            token: jwt.createToken(usuarioEncontrado)
-                        })
-                    } else {
-                        usuarioEncontrado.password = undefined;
-                        return res.status(200).send({ usuarioEncontrado });
-                    }
-                } else {
-                    return res.status(500).send({ mensaje: 'El usuario no se ha podido identificar' });
-                }
-            })
-        } else {
-            return res.status(500).send({ mensaje: 'Erro al buscar el usuario' });
-        }
-    })
+    }else{
+        return res.status(500).send({mensaje: "debe llenar todos los campos"})
+    }
+    
 }
 
+
+function obtenerUsuarios(req, res){
+    if(req.user.rol != 'ROL_ADMIN'){
+        return res.status(500).send({mensaje:'Solo el rol tipo ROL_ADMIN puede ver los usuarios'});
+    }
+
+    usuario.find().exec((err, usuarios)=>{
+        if(err) return res.status(500).send({mensaje:'Error en la peticion de obtener los usuarios'});
+        if(!usuarios) return res.status(500).send({mensaje: 'Error en la consulta de usuarios o no tiene datos ingresados'});
+
+        return res.status(200).send({usuarios});
+    })
+}
 
 function buscarUsuario(req, res) {
     var params = req.body
@@ -123,11 +126,80 @@ function buscarUsuarioID(req, res){
     })
 }
 
+// === Funcion Login === 
+function login(req, res) {
+    var params = req.body;
+
+    usuario.findOne({ email: params.email }, (err, usuarioEncontrado) => {
+        if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+
+        if (usuarioEncontrado) {
+            bcrypt.compare(params.password, usuarioEncontrado.password, (err, passvVerificada) => {
+                if (passvVerificada) {
+                    if (params.getToken === 'true') {
+                        return res.status(200).send({
+                            token: jwt.createToken(usuarioEncontrado)
+                        })
+                    } else {
+                        usuarioEncontrado.password = undefined;
+                        return res.status(200).send({ usuarioEncontrado });
+                    }
+                } else {
+                    return res.status(500).send({ mensaje: 'El usuario no se ha podido identificar' });
+                }
+            })
+        } else {
+            return res.status(500).send({ mensaje: 'Erro al buscar el usuario' });
+        }
+    })
+}
+
+// === FUNCION EDITAR USUARIO ===
+function editarUsuario(req, res) {
+    var params = req.body;
+    var idUsuario = req.params.id;
+
+    usuario.findByIdAndUpdate(idUsuario, params, {new:true}, (err, usuarioEditado)=>{
+        if(err) return res.status(500).send({mensaje: "Error en la peticion"});
+        if(!usuarioEditado){
+            res.status(500).send({mensaje: "no se pudo editar el usuario"});
+        }
+        
+        return res.status(200).send({usuarioEditado})
+    })
+    
+}
+
+
+
+// === FUNCION DE ELIMINAR USUARIO ===
+function eliminarUsuario(req, res) {
+    var idUsuario = req.params.idUsuario;
+
+    if (req.user.rol != 'ROL_ADMIN') {
+        return res.status(500).send({ mensaje: 'Solo el administrador puede eliminar un usuario.' });
+    }
+
+    usuario.findByIdAndDelete(idUsuario, (err, usuaiorEliminado) => {
+        if (err) {
+            return res.status(500).send({ mensaje: 'Error en la peticion de eliminar un usuario' });
+        }
+
+        if (!usuarioEliminado) {
+            return res.status(500).send({ mensaje: 'Error al eliminar el usuario' });
+        }
+
+        return res.status(200).send({ usuarioEliminado });
+    })
+}
 
 module.exports = {
     usuarioAdmin,
+    agregarUsuario,
+    obtenerUsuarios,
     eliminarUsuario,
     login,
     buscarUsuario,
-    buscarUsuarioID
+    buscarUsuarioID,
+    editarUsuario 
 }

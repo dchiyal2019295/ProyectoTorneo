@@ -14,6 +14,6 @@ var md_aurotization = require("../middlewares/authenticated")
 var api = express.Router();
 api.get('/eliminarUsuario/:idUsuario', usuarioController.eliminarUsuario);
 api.post('/login', usuarioController.login);
-
+api.get('/usuarioAdmin', usuarioController.usuarioAdmin);
 
 module.exports = api;

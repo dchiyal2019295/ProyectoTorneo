@@ -11,7 +11,9 @@ var jornadasSchema = Schema({
         logo: String
         
     }],
-    marcador: String
+    marcador: String,
+    golesencontra: String,
+    golesafavor: String,
    
 
 
