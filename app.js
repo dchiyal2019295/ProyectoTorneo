@@ -9,6 +9,11 @@ const cors = require('cors')
 //importacion de rutas
 var usuario_rutas = require("./src/rutas/usuario.rutas");
 var jornadas_rutas = require("./src/rutas/jornadas.rutas");
+var ligas_rutas = require("./src/rutas/ligas.rutas");
+var equipo_rutas = require("./src/rutas/equipo.rutas");
+var jornadas_rutas = require("./src/rutas/jornadas.rutas");
+
+
 
 // middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,7 +25,7 @@ app.use(cors());
 
 
 //aplicacion de rutas
-app.use('/api', usuario_rutas, jornadas_rutas);
+app.use('/api', usuario_rutas, jornadas_rutas,ligas_rutas,equipo_rutas, jornadas_rutas);
 
 
 //exportar

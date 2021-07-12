@@ -4,14 +4,10 @@ var moongose = require("mongoose");
 var Schema = moongose.Schema;
 
 var ligasSchema = Schema({
-    noEquipo: String,
     nombre: String,
-    descripcion: String,
-    equipos: [{
-        nombreEquipo: String,
-        imagenEquipo: String
-    }]
-});
+    autor: { type: Schema.Types.String, ref: 'usuarios' }
+    }
+);
 
 module.exports = moongose.model("ligas", ligasSchema);
 

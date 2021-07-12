@@ -7,6 +7,6 @@ var md_autorization = require("../middlewares/authenticated");
 
 var api = express.Router();
 api.post('/agregarJornada',md_autorization.ensureAuth, jornadaControlador.agregarJornada);
-api.put('/agregarEquipos', md_autorization.ensureAuth, jornadaControlador.agregarEquipos);
+api.put('/agregarEquiposs/:id', md_autorization.ensureAuth, jornadaControlador.agregarEquiposs);
 
 module.exports = api;

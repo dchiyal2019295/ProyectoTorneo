@@ -1,16 +1,16 @@
 'use strict'
 
 var express = require("express");
-var ligaControlador = require("../controlador/ligas.controlador");
+var ligaControlador = require("../controladores/ligas.controlador");
 
 var md_autorization = require("../middlewares/authenticated");
 
 var api = express.Router();
-api.post('/agrgarLigas', md_autorization.ensureAuth, ligaControlador.agregarLigas);
-api.get('/visualizarLigas', md_autorization.ensureAuth, ligaControlador.visualizarLigas);
-api.put('/agregarEquipos', md_autorization.ensureAuth, ligaControlador.agregarEquipos);
-api.put('/editarLigas', md_autorization.ensureAuth, ligaControlador.editarLigas);
-api.delete('/eliminarLigas', md_autorization.ensureAuth, ligaControlador.eliminarLigas);
+api.post('/agregarLigas', md_autorization.ensureAuth, ligaControlador.agregarLigas);
+api.get('/visualizarLigas', md_autorization.ensureAuth, ligaControlador.obtenerLigas);
+api.get('/obtenerLigasId/:idLigas', md_autorization.ensureAuth, ligaControlador.obtenerLigasID);
+api.put('/editarLigas/:id', md_autorization.ensureAuth, ligaControlador.editarLigas);
+api.delete('/eliminarLigas/:id', md_autorization.ensureAuth, ligaControlador.eliminarLigas);
 
 
 

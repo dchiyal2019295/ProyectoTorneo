@@ -13,7 +13,7 @@ function agregarJornada(req,res){
  }
 
 
-if(params.nombre && params.marcador && params.golesencontra && golesafavor){
+if(params.nombre && params.marcador && params.golesencontra && params.golesafavor){
     jornadaModelo.nombre = params.nombre;
     jornadaModelo.marcador = params.marcador;
     jornadaModelo.golesencontra = params.golesencontra
@@ -44,16 +44,15 @@ if(params.nombre && params.marcador && params.golesencontra && golesafavor){
 
 }
 
-function agregarEquipos( req, res){
+function agregarEquiposs( req, res){
     var params = req.body;
     var idjornada = req.params.id;
-    var jornadaModelo = new jornadas();
     
     
     if(req.user.rol != "ROL_ADMIN"){
         return res.status(500).send({mensaje: 'No posee los permisos para Agregar Equipos'})
     }
-    jornadas.findByIdAndUpdate(idjornada,{$push: {equipos:{ nombreEquipo: params.nombreEquipo}}},
+    jornadas.findByIdAndUpdate(idjornada,{$push: {equipos:{ nombre: params.nombre, logo: params.logo}}},
         {new: true}, (err, equipoAgregado)=>{
             return res.status(200).send({equipoAgregado: equipoAgregado});
         } 
@@ -62,5 +61,5 @@ function agregarEquipos( req, res){
 
 module.exports={
     agregarJornada,
-    agregarEquipos
+    agregarEquiposs
 }

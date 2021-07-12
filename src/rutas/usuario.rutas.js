@@ -15,5 +15,6 @@ var api = express.Router();
 api.get('/eliminarUsuario/:idUsuario', usuarioController.eliminarUsuario);
 api.post('/login', usuarioController.login);
 api.get('/usuarioAdmin', usuarioController.usuarioAdmin);
+api.post('/agregarUsuario', usuarioController.agregarUsuario);
 
 module.exports = api;

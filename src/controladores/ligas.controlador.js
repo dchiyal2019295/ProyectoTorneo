@@ -47,33 +47,26 @@ function obtenerLigasID(req, res) {
         return res.status(200).send({ ligaEncontrada });
     })
 }
-function editarLigas(req,res){
+
+
+function editarLigas(req, res) {
+    var idLigas = req.params.id;
     var params = req.body;
-    var idLiga = req.params.id
-    var idUsuario = req.params.idUsuario;
 
-
-    if (idUsuario != req.user.sub) {
-        return res.status(500).send({ mensaje: 'No posee los permisos para editar las ligas de otros usuarios' });
+    
+    if (req.user.rol != "ROL_USUARIO") {
+        return res.status(500).send({ mensaje: 'No posee los permisos para eliminar las ligas de otros usuarios' });
     }
 
-    Ligas.find({nombre: params.nombre}).exec((err,ligaEncontrada)=>{
-        if (err) return res.status(500).send({Mensaje: 'Error en la peticion'});
+    delete params.password;
     
-        if(ligaEncontrada && ligaEncontrada.length >= 1){
-            return res.status(500).send({mensaje: 'El nombre ya esta en uso'})
-        }else{
-            
-            Ligas.findOne({ _id: idLiga}).exec((err,ligaEncontrada ) =>{
-                if(err) return res.status(500).send({ Mensaje: 'Error en la peticion que desea'});
+    Ligas.findByIdAndUpdate(idLigas, params, { new: true }, (err, ligasActualizadas) => {
+        if (err) return res.status(500).send({ mensaje: 'Error en la peticion' });
+        if (!ligasActualizadas) return res.status(500).send({ mensaje: 'No se a podido editar al Usuario' });
 
-                if(!ligaEncontrada) return res.status(500).send({ Mensaje: 'No existen los datos '});
-
-                    Ligas.findByIdAndUpdate(idLiga)
-            })
-        }
+        return res.status(200).send({ ligasActualizadas })
     })
-
+  
 }
 
 function eliminarLigas(req, res){
@@ -98,55 +91,6 @@ function eliminarLigas(req, res){
 
 
 
-function agregarEquipos(req, res){
-    var params = req.body;
-    var idLiga = req.params.id;
-
-    Ligas.findByIdAndUpdate(idLiga, { $push: { equipos: { nombreEquipo: params.nombreEquipo, imagenEquipo: params.imagenEquipo}}},
-        {new: true}, (err, equipoAgregado)=>{
-           
-            return res.status(200).send({equipoAgregado: equipoAgregado})
-        })
-}
-
-function obtenerEquipos(req, res) {
-    var idLigas = req.params.id;
-    Ligas.findById(idLigas, { equipos: 1 }, (err, equiposObtenidos)=>{
-        return res.status(200).send({ equiposObtenidos: equiposObtenidos});
-    })
-}
-
-function editarEquipos(req, res){
-    var ligaID = req.params.idLiga;
-    var equipoID = req.params.idEquipo;
-    var params = req.body;
-    var datosPorActualizar = {};
-
-    if(params.nombreEquipo) datosPorActualizar['equipos.$.nombreEquipo'] = params.nombreEquipo;
-
-    Ligas.findOneAndUpdate( {_id: ligaID, "equipos._id": equipoID}, datosPorActualizar, {new: true},
-    (err, equipoActualizado)=>{
-        if(err) return res.status(500).send({ mensaje: 'Error en la peticion del Equipo' });
-        if(!equipoActualizado) return res.status(500).send({mensaje: 'Error al editar el equipo'});
-
-        return res.status(200).send({ equipoActualizado });
-    })
-}
-
-function eliminarEquipo(req, res){
-    var idEquipoLiga = req.params.idEquipo;
-
-    Ligas.findOneAndUpdate({ "equipos._id": idEquipoLiga }, { $pull: { equipos: { _id: idEquipoLiga } } }, {new: true},
-    (err, ligaActualizada)=>{
-        if(err) return res.status(500).send({ mensaje: 'Error en la peticion de comentario' });
-        if(!ligaActualizada) return res.status(500).send({ mensaje: 'Error al eliminar el Comentario' });
-
-        return res.status(200).send({ ligaActualizada })
-    })
-}
-
-
-
 module.exports = {
     agregarLigas,
     obtenerLigas,
@@ -154,8 +98,4 @@ module.exports = {
     editarLigas,
     eliminarLigas,
     ejemplo,
-    agregarEquipos,
-    obtenerEquipos,
-    editarEquipos,
-    eliminarEquipo
 }
